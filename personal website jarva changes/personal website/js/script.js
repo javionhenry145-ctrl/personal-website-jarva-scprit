@@ -102,11 +102,7 @@ function updateGreetingAndClock() {
 updateGreetingAndClock();
 window.setInterval(updateGreetingAndClock, 1000);
 
-/* =====================================================================
-   FEATURE 3 - LIVE HOBBY SEARCH
-   The hobby cards are created from this data, then rebuilt whenever the
-   visitor types in the search box.
-   ===================================================================== */
+
 const hobbyData = [
     {
         icon: "🏓",
@@ -139,7 +135,7 @@ const hobbySearch = document.getElementById("hobby-search");
 const hobbyCount = document.getElementById("hobby-count");
 const hobbyEmpty = document.getElementById("hobby-empty");
 
-// Build one hobby card element from a hobby object.
+
 function createHobbyCard(hobby) {
     const card = document.createElement("article");
     card.className = "hobby-card";
