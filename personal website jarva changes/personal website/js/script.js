@@ -160,7 +160,7 @@ function matchesSearch(hobby, searchTerm) {
     return searchableText.includes(searchTerm);
 }
 
-// Remove the current cards and create only the ones that match the search.
+
 function renderHobbies(searchTerm) {
     const term = (searchTerm || "").trim().toLowerCase();
     const visibleHobbies = hobbyData.filter(function (hobby) {
@@ -186,10 +186,6 @@ hobbySearch.addEventListener("input", function (event) {
 
 renderHobbies("");
 
-/* =====================================================================
-   FEATURE 4 - PHOTO GALLERY SLIDESHOW
-   Previous / next buttons, clickable dots and automatic rotation.
-   ===================================================================== */
 const slides = [
     {
         src: "images/javion-photo-1.jpg",
@@ -216,7 +212,7 @@ const nextSlideButton = document.getElementById("slide-next");
 let currentSlide = 0;
 let autoPlayTimer = null;
 
-// Create one dot button for each photo.
+
 function createSlideDots() {
     slides.forEach(function (slide, index) {
         const dot = document.createElement("button");
@@ -231,7 +227,6 @@ function createSlideDots() {
     });
 }
 
-// Show the slide at the given index and update every related element.
 function showSlide(index) {
     currentSlide = (index + slides.length) % slides.length;
     const slide = slides[currentSlide];
@@ -284,7 +279,7 @@ nextSlideButton.addEventListener("click", function () {
     restartAutoPlay();
 });
 
-// Pause while the visitor is looking at or interacting with the slideshow.
+
 slideshow.addEventListener("mouseenter", stopAutoPlay);
 slideshow.addEventListener("mouseleave", startAutoPlay);
 slideshow.addEventListener("focusin", stopAutoPlay);
