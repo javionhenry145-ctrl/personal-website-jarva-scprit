@@ -292,10 +292,6 @@ createSlideDots();
 showSlide(0);
 startAutoPlay();
 
-/* =====================================================================
-   FEATURE 5 - CONTACT FORM VALIDATION + CHARACTER COUNTER
-   Reads the form values, checks them, then displays what was submitted.
-   ===================================================================== */
 const contactForm = document.getElementById("contact-form");
 const nameField = document.getElementById("contact-name");
 const emailField = document.getElementById("contact-email");
