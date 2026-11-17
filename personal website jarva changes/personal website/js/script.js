@@ -1,6 +1,4 @@
 "use strict";
-
-
 const THEME_STORAGE_KEY = "javion-theme";
 const themeToggle = document.getElementById("theme-toggle");
 const themeIcon = themeToggle.querySelector(".theme-icon");
@@ -60,10 +58,7 @@ themeToggle.addEventListener("click", function () {
 
 applyTheme(getInitialTheme());
 
-/* =====================================================================
-   FEATURE 2 - TIME-BASED GREETING AND LIVE CLOCK
-   Uses the Date object and Intl formatters, refreshed every second.
-   ===================================================================== */
+
 const greetingText = document.getElementById("greeting");
 const clockText = document.getElementById("live-clock");
 
@@ -338,7 +333,7 @@ function updateCharacterCount() {
     characterCount.classList.toggle("is-near-limit", usedCharacters > MAX_MESSAGE_LENGTH - 40);
 }
 
-// Show the values that the visitor submitted.
+
 function displaySubmittedValues(values) {
     const heading = document.createElement("h4");
     heading.textContent = "Submitted values";
@@ -364,7 +359,6 @@ function displaySubmittedValues(values) {
     formResult.hidden = false;
 }
 
-// Return the trimmed form values when everything is valid, otherwise null.
 function validateForm() {
     const values = {
         name: nameField.value.trim(),
@@ -433,9 +427,6 @@ contactForm.addEventListener("submit", function (event) {
     updateCharacterCount();
 });
 
-// The "Clear" button also removes the messages and resets the counter.
-// It is attached to the button rather than the form's reset event because
-// form.reset() is called after a successful submit too.
 const resetButton = contactForm.querySelector('button[type="reset"]');
 
 resetButton.addEventListener("click", function () {
@@ -449,7 +440,6 @@ resetButton.addEventListener("click", function () {
     }, 0);
 });
 
-// Remove an error message as soon as the visitor starts fixing that field.
 nameField.addEventListener("input", function () {
     clearFieldError(nameField, nameError);
 });
