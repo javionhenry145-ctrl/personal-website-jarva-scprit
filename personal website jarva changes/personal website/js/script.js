@@ -5,7 +5,7 @@ const themeIcon = themeToggle.querySelector(".theme-icon");
 const themeText = themeToggle.querySelector(".theme-text");
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
-// localStorage can throw in some privacy modes, so wrap access in try/catch.
+
 function readSavedTheme() {
     try {
         return localStorage.getItem(THEME_STORAGE_KEY);
@@ -18,11 +18,11 @@ function saveTheme(theme) {
     try {
         localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch (error) {
-        // The toggle still works for this visit even if saving fails.
+      
     }
 }
 
-// Update the page colours, the button label and the browser tab colour.
+
 function applyTheme(theme) {
     const isDark = theme === "dark";
 
@@ -43,7 +43,7 @@ function getInitialTheme() {
         return savedTheme;
     }
 
-    // No saved choice yet, so follow the operating system preference.
+
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     return prefersDark ? "dark" : "light";
 }
@@ -292,10 +292,7 @@ createSlideDots();
 showSlide(0);
 startAutoPlay();
 
-/* =====================================================================
-   FEATURE 5 - CONTACT FORM VALIDATION + CHARACTER COUNTER
-   Reads the form values, checks them, then displays what was submitted.
-   ===================================================================== */
+
 const contactForm = document.getElementById("contact-form");
 const nameField = document.getElementById("contact-name");
 const emailField = document.getElementById("contact-email");
