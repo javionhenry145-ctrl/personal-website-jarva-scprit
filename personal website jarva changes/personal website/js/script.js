@@ -1,453 +1,181 @@
 "use strict";
-const THEME_STORAGE_KEY = "javion-theme";
-const themeToggle = document.getElementById("theme-toggle");
+
+const themeToggle = document.querySelector("#theme-toggle");
 const themeIcon = themeToggle.querySelector(".theme-icon");
 const themeText = themeToggle.querySelector(".theme-text");
-const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
-
-function readSavedTheme() {
-    try {
-        return localStorage.getItem(THEME_STORAGE_KEY);
-    } catch (error) {
-        return null;
-    }
-}
-
-function saveTheme(theme) {
-    try {
-        localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch (error) {
-      
-    }
-}
-
 
 function applyTheme(theme) {
     const isDark = theme === "dark";
-
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.dataset.theme = theme;
     themeToggle.setAttribute("aria-pressed", String(isDark));
     themeIcon.textContent = isDark ? "☀" : "☾";
-    themeText.textContent = isDark ? "Light mode" : "Dark mode";
-
-    if (themeColorMeta) {
-        themeColorMeta.setAttribute("content", isDark ? "#0c1220" : "#ffffff");
-    }
+    themeText.textContent = isDark ? "Light" : "Dark";
 }
 
-function getInitialTheme() {
-    const savedTheme = readSavedTheme();
+const savedTheme = localStorage.getItem("javion-theme");
+applyTheme(savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 
-    if (savedTheme === "dark" || savedTheme === "light") {
-        return savedTheme;
-    }
-
-
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return prefersDark ? "dark" : "light";
-}
-
-themeToggle.addEventListener("click", function () {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const nextTheme = currentTheme === "dark" ? "light" : "dark";
-
-    applyTheme(nextTheme);
-    saveTheme(nextTheme);
+themeToggle.addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(theme);
+    localStorage.setItem("javion-theme", theme);
 });
 
-applyTheme(getInitialTheme());
+const greeting = document.querySelector("#greeting");
+const clock = document.querySelector("#live-clock");
 
-
-const greetingText = document.getElementById("greeting");
-const clockText = document.getElementById("live-clock");
-
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-});
-
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short"
-});
-
-function getGreetingForHour(hour) {
-    if (hour < 12) {
-        return "Good morning";
-    }
-
-    if (hour < 17) {
-        return "Good afternoon";
-    }
-
-    return "Good evening";
-}
-
-function updateGreetingAndClock() {
+function updateClock() {
     const now = new Date();
-
-    greetingText.textContent = getGreetingForHour(now.getHours()) + ", and welcome!";
-    clockText.textContent = timeFormatter.format(now) + " · " + dateFormatter.format(now);
-    clockText.setAttribute("datetime", now.toISOString());
+    const hour = now.getHours();
+    greeting.textContent = hour < 12 ? "Good morning." : hour < 17 ? "Good afternoon." : "Good evening.";
+    clock.textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
-updateGreetingAndClock();
-window.setInterval(updateGreetingAndClock, 1000);
+updateClock();
+setInterval(updateClock, 1000);
 
-
-const hobbyData = [
-    {
-        icon: "🏓",
-        title: "Table Tennis",
-        description: "I enjoy the speed and competition of table tennis and the challenge of improving my game.",
-        keywords: "sport ping pong match competition practice"
-    },
-    {
-        icon: "🎮",
-        title: "Video Games",
-        description: "Gaming is one of my favourite ways to relax, have fun, and connect with friends.",
-        keywords: "gaming console friends relaxing fun"
-    },
-    {
-        icon: "💻",
-        title: "Technology",
-        description: "I like learning about computers, websites, and how technology can solve problems.",
-        keywords: "computers coding websites programming learning"
-    },
-    {
-        icon: "🎬",
-        title: "Movies & Music",
-        description: "I enjoy watching movies and listening to music when I have free time.",
-        keywords: "film films songs music relaxing"
-    }
+const hobbies = [
+    ["🏓", "Table Tennis", "I enjoy competition and improving my game.", "sport ping pong practice"],
+    ["🎮", "Video Games", "Gaming helps me relax and connect with friends.", "gaming console friends"],
+    ["💻", "Technology", "I like learning how computers and websites work.", "coding computers websites"],
+    ["🎬", "Movies & Music", "I enjoy movies and music in my free time.", "film songs entertainment"]
 ];
 
-const hobbyGrid = document.getElementById("hobby-grid");
-const hobbySearch = document.getElementById("hobby-search");
-const hobbyCount = document.getElementById("hobby-count");
-const hobbyEmpty = document.getElementById("hobby-empty");
+const hobbyGrid = document.querySelector("#hobby-grid");
+const hobbySearch = document.querySelector("#hobby-search");
+const hobbyCount = document.querySelector("#hobby-count");
+const hobbyEmpty = document.querySelector("#hobby-empty");
 
+function renderHobbies() {
+    const term = hobbySearch.value.trim().toLowerCase();
+    const matches = hobbies.filter(hobby => hobby.join(" ").toLowerCase().includes(term));
 
-function createHobbyCard(hobby) {
-    const card = document.createElement("article");
-    card.className = "hobby-card";
-
-    const icon = document.createElement("div");
-    icon.className = "hobby-icon";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = hobby.icon;
-
-    const title = document.createElement("h3");
-    title.textContent = hobby.title;
-
-    const description = document.createElement("p");
-    description.textContent = hobby.description;
-
-    card.append(icon, title, description);
-    return card;
-}
-
-function matchesSearch(hobby, searchTerm) {
-    const searchableText = (hobby.title + " " + hobby.description + " " + hobby.keywords).toLowerCase();
-    return searchableText.includes(searchTerm);
-}
-
-
-function renderHobbies(searchTerm) {
-    const term = (searchTerm || "").trim().toLowerCase();
-    const visibleHobbies = hobbyData.filter(function (hobby) {
-        return matchesSearch(hobby, term);
+    hobbyGrid.replaceChildren();
+    matches.forEach(([icon, title, description]) => {
+        const card = document.createElement("article");
+        card.className = "hobby-card";
+        card.innerHTML = `<div class="hobby-icon" aria-hidden="true">${icon}</div><h3>${title}</h3><p>${description}</p>`;
+        hobbyGrid.append(card);
     });
 
-    hobbyGrid.replaceChildren(...visibleHobbies.map(function (hobby) {
-        return createHobbyCard(hobby);
-    }));
-
-    hobbyEmpty.hidden = visibleHobbies.length > 0;
-
-    if (term === "") {
-        hobbyCount.textContent = "Showing all " + hobbyData.length + " hobbies";
-    } else {
-        hobbyCount.textContent = "Showing " + visibleHobbies.length + " of " + hobbyData.length + " hobbies";
-    }
+    hobbyCount.textContent = term ? `${matches.length} of ${hobbies.length} hobbies` : `All ${hobbies.length} hobbies`;
+    hobbyEmpty.hidden = matches.length > 0;
 }
 
-hobbySearch.addEventListener("input", function (event) {
-    renderHobbies(event.target.value);
-});
-
-renderHobbies("");
+hobbySearch.addEventListener("input", renderHobbies);
+renderHobbies();
 
 const slides = [
-    {
-        src: "images/javion-photo-1.jpg",
-        alt: "Javion standing indoors in a white graphic T-shirt and pink shorts",
-        caption: "One of my photos"
-    },
-    {
-        src: "images/javion-photo-2.jpg",
-        alt: "Javion outdoors wearing a green shirt, black shorts, and a cap",
-        caption: "Another snapshot"
-    }
+    ["images/javion-photo-1.jpg", "Javion standing indoors", "One of my photos"],
+    ["images/javion-photo-2.jpg", "Javion outdoors wearing a cap", "Another snapshot"]
 ];
 
-const SLIDE_DELAY = 5000;
+const slideImage = document.querySelector("#slide-image");
+const slideCaption = document.querySelector("#slide-caption");
+const slideStatus = document.querySelector("#slide-status");
+const slideDots = document.querySelector("#slide-dots");
+let slideIndex = 0;
 
-const slideshow = document.getElementById("slideshow");
-const slideImage = document.getElementById("slide-image");
-const slideCaption = document.getElementById("slide-caption");
-const slideStatus = document.getElementById("slide-status");
-const slideDots = document.getElementById("slide-dots");
-const previousSlideButton = document.getElementById("slide-prev");
-const nextSlideButton = document.getElementById("slide-next");
-
-let currentSlide = 0;
-let autoPlayTimer = null;
-
-
-function createSlideDots() {
-    slides.forEach(function (slide, index) {
-        const dot = document.createElement("button");
-        dot.type = "button";
-        dot.className = "slide-dot";
-        dot.setAttribute("aria-label", "Show photo " + (index + 1) + " of " + slides.length);
-        dot.addEventListener("click", function () {
-            showSlide(index);
-            restartAutoPlay();
-        });
-        slideDots.appendChild(dot);
-    });
-}
+slides.forEach((_, index) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "slide-dot";
+    dot.setAttribute("aria-label", `Show photo ${index + 1}`);
+    dot.addEventListener("click", () => showSlide(index));
+    slideDots.append(dot);
+});
 
 function showSlide(index) {
-    currentSlide = (index + slides.length) % slides.length;
-    const slide = slides[currentSlide];
+    slideIndex = (index + slides.length) % slides.length;
+    const [src, alt, caption] = slides[slideIndex];
+    slideImage.src = src;
+    slideImage.alt = alt;
+    slideCaption.textContent = caption;
+    slideStatus.textContent = `Photo ${slideIndex + 1} of ${slides.length}`;
 
-    slideImage.setAttribute("src", slide.src);
-    slideImage.setAttribute("alt", slide.alt);
-    slideCaption.textContent = slide.caption;
-    slideStatus.textContent = "Photo " + (currentSlide + 1) + " of " + slides.length;
-
-    const dots = slideDots.querySelectorAll(".slide-dot");
-    dots.forEach(function (dot, dotIndex) {
-        const isActive = dotIndex === currentSlide;
-        dot.classList.toggle("is-active", isActive);
-        dot.setAttribute("aria-pressed", String(isActive));
+    slideDots.querySelectorAll("button").forEach((dot, dotIndex) => {
+        dot.classList.toggle("is-active", dotIndex === slideIndex);
     });
 }
 
-function showNextSlide() {
-    showSlide(currentSlide + 1);
-}
-
-function startAutoPlay() {
-    if (autoPlayTimer !== null) {
-        return;
-    }
-
-    autoPlayTimer = window.setInterval(showNextSlide, SLIDE_DELAY);
-}
-
-function stopAutoPlay() {
-    window.clearInterval(autoPlayTimer);
-    autoPlayTimer = null;
-}
-
-function restartAutoPlay() {
-    stopAutoPlay();
-
-    if (!document.hidden) {
-        startAutoPlay();
-    }
-}
-
-previousSlideButton.addEventListener("click", function () {
-    showSlide(currentSlide - 1);
-    restartAutoPlay();
-});
-
-nextSlideButton.addEventListener("click", function () {
-    showSlide(currentSlide + 1);
-    restartAutoPlay();
-});
-
-
-slideshow.addEventListener("mouseenter", stopAutoPlay);
-slideshow.addEventListener("mouseleave", startAutoPlay);
-slideshow.addEventListener("focusin", stopAutoPlay);
-slideshow.addEventListener("focusout", startAutoPlay);
-
-document.addEventListener("visibilitychange", function () {
-    if (document.hidden) {
-        stopAutoPlay();
-    } else {
-        startAutoPlay();
-    }
-});
-
-createSlideDots();
+document.querySelector("#slide-prev").addEventListener("click", () => showSlide(slideIndex - 1));
+document.querySelector("#slide-next").addEventListener("click", () => showSlide(slideIndex + 1));
 showSlide(0);
-startAutoPlay();
 
+const form = document.querySelector("#contact-form");
+const fields = {
+    name: document.querySelector("#contact-name"),
+    email: document.querySelector("#contact-email"),
+    message: document.querySelector("#contact-message")
+};
+const messageCount = document.querySelector("#char-count");
+const formStatus = document.querySelector("#form-status");
+const formResult = document.querySelector("#form-result");
 
-const contactForm = document.getElementById("contact-form");
-const nameField = document.getElementById("contact-name");
-const emailField = document.getElementById("contact-email");
-const messageField = document.getElementById("contact-message");
-const nameError = document.getElementById("name-error");
-const emailError = document.getElementById("email-error");
-const messageError = document.getElementById("message-error");
-const characterCount = document.getElementById("char-count");
-const formStatus = document.getElementById("form-status");
-const formResult = document.getElementById("form-result");
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const MAX_MESSAGE_LENGTH = 300;
-
-function setFieldError(field, errorElement, message) {
-    field.setAttribute("aria-invalid", "true");
-    errorElement.textContent = message;
+function clearErrors() {
+    form.querySelectorAll("[aria-invalid]").forEach(field => field.removeAttribute("aria-invalid"));
+    form.querySelectorAll(".field-error").forEach(error => { error.textContent = ""; });
 }
 
-function clearFieldError(field, errorElement) {
-    field.removeAttribute("aria-invalid");
-    errorElement.textContent = "";
+function updateCount() {
+    messageCount.textContent = `${fields.message.value.length} / 300 characters`;
 }
 
-function clearAllFormErrors() {
-    clearFieldError(nameField, nameError);
-    clearFieldError(emailField, emailError);
-    clearFieldError(messageField, messageError);
-}
+fields.message.addEventListener("input", updateCount);
+updateCount();
 
-function updateCharacterCount() {
-    const usedCharacters = messageField.value.length;
-
-    characterCount.textContent = usedCharacters + " / " + MAX_MESSAGE_LENGTH + " characters";
-    characterCount.classList.toggle("is-near-limit", usedCharacters > MAX_MESSAGE_LENGTH - 40);
-}
-
-
-function displaySubmittedValues(values) {
-    const heading = document.createElement("h4");
-    heading.textContent = "Submitted values";
-
-    const list = document.createElement("dl");
-    const rows = [
-        ["Name", values.name],
-        ["Email", values.email],
-        ["Message", values.message]
-    ];
-
-    rows.forEach(function (row) {
-        const label = document.createElement("dt");
-        label.textContent = row[0];
-
-        const value = document.createElement("dd");
-        value.textContent = row[1];
-
-        list.append(label, value);
-    });
-
-    formResult.replaceChildren(heading, list);
-    formResult.hidden = false;
-}
-
-function validateForm() {
-    const values = {
-        name: nameField.value.trim(),
-        email: emailField.value.trim(),
-        message: messageField.value.trim()
-    };
-
-    let isValid = true;
-    let firstInvalidField = null;
-
-    clearAllFormErrors();
-
-    if (values.name.length < 2) {
-        setFieldError(nameField, nameError, "Please enter your name (at least 2 characters).");
-        isValid = false;
-
-        if (!firstInvalidField) {
-            firstInvalidField = nameField;
-        }
-    }
-
-    if (!EMAIL_PATTERN.test(values.email)) {
-        setFieldError(emailField, emailError, "Enter a valid email address, for example name@example.com.");
-        isValid = false;
-
-        if (!firstInvalidField) {
-            firstInvalidField = emailField;
-        }
-    }
-
-    if (values.message.length < 10) {
-        setFieldError(messageField, messageError, "Your message needs at least 10 characters.");
-        isValid = false;
-
-        if (!firstInvalidField) {
-            firstInvalidField = messageField;
-        }
-    }
-
-    if (!isValid) {
-        firstInvalidField.focus();
-        return null;
-    }
-
-    return values;
-}
-
-contactForm.addEventListener("submit", function (event) {
+form.addEventListener("submit", event => {
     event.preventDefault();
+    clearErrors();
 
-    const values = validateForm();
+    const name = fields.name.value.trim();
+    const email = fields.email.value.trim();
+    const message = fields.message.value.trim();
+    const errors = [];
 
-    if (!values) {
-        formStatus.textContent = "Please fix the highlighted fields and try again.";
-        formStatus.className = "form-status is-error";
-        formResult.hidden = true;
+    if (name.length < 2) errors.push([fields.name, "name-error", "Please enter your name."]);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) errors.push([fields.email, "email-error", "Please enter a valid email."]);
+    if (message.length < 10) errors.push([fields.message, "message-error", "Please write at least 10 characters."]);
+
+    if (errors.length) {
+        errors.forEach(([field, errorId, text]) => {
+            field.setAttribute("aria-invalid", "true");
+            document.querySelector(`#${errorId}`).textContent = text;
+        });
+        errors[0][0].focus();
+        formStatus.textContent = "Please fix the highlighted fields.";
         return;
     }
 
-    displaySubmittedValues(values);
+    formResult.replaceChildren();
+    const heading = document.createElement("h4");
+    heading.textContent = "Submitted message";
+    const list = document.createElement("dl");
 
-    formStatus.textContent = "Thanks, " + values.name + "! Your message has been recorded below.";
-    formStatus.className = "form-status is-success";
+    [
+        ["Name", name],
+        ["Email", email],
+        ["Message", message]
+    ].forEach(([label, value]) => {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value;
+        list.append(term, description);
+    });
 
-    contactForm.reset();
-    updateCharacterCount();
+    formResult.append(heading, list);
+    formResult.hidden = false;
+    formStatus.textContent = `Thanks, ${name}!`;
+    form.reset();
+    updateCount();
 });
 
-const resetButton = contactForm.querySelector('button[type="reset"]');
-
-resetButton.addEventListener("click", function () {
-    window.setTimeout(function () {
-        clearAllFormErrors();
+form.addEventListener("reset", () => {
+    setTimeout(() => {
+        clearErrors();
         formStatus.textContent = "";
-        formStatus.className = "form-status";
         formResult.hidden = true;
-        formResult.replaceChildren();
-        updateCharacterCount();
-    }, 0);
+        updateCount();
+    });
 });
-
-nameField.addEventListener("input", function () {
-    clearFieldError(nameField, nameError);
-});
-
-emailField.addEventListener("input", function () {
-    clearFieldError(emailField, emailError);
-});
-
-messageField.addEventListener("input", function () {
-    clearFieldError(messageField, messageError);
-    updateCharacterCount();
-});
-
-updateCharacterCount();
